@@ -186,7 +186,6 @@ struct Note
 };
 
 
-
 //noteIndex starts at 1
 Note GetNote(int scaleType, int startLetter, int accidental, int noteIndex)
 {
