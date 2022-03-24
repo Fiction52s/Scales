@@ -7,28 +7,11 @@
 #include <chrono>
 #include <assert.h>
 
+#include "Note.h"
+
 using namespace std;
 
-const static int NUM_SCALES = 12;
-const static int NUM_NOTES_PER_SCALE = 7;
-
-string numbers[] = { "2nd", "3rd", "4th", "5th", "6th", "7th" };
-
-string scales[NUM_SCALES][NUM_NOTES_PER_SCALE] =
-{
-	{ "C", "D", "E", "F", "G", "A", "B" },
-	{ "D", "E", "F#", "G", "A", "B", "C#" },
-	{ "E", "F#", "G#", "A", "B", "C#", "D#" },
-	{ "F#", "G#", "A#", "B", "C#", "D#", "E#" },
-	{ "Ab", "Bb", "C", "Db", "Eb", "F", "G" },
-	{ "Bb", "C", "D", "Eb", "F", "G", "A" },
-	{ "G", "A", "B", "C", "D", "E", "F#" },
-	{ "A", "B", "C#", "D", "E", "F#", "G#" },
-	{ "B", "C#", "D#", "E", "F#", "G#", "A#" },
-	{ "Db", "Eb", "F", "Gb", "Ab", "Bb", "C" },
-	{ "Eb", "F", "G", "Ab", "Bb", "C", "D" },
-	{ "F", "G", "A", "Bb", "C", "D", "E" },
-};
+Scale majorScales[NUM_MAJOR_SCALES];
 
 string sharps[NUM_NOTES_PER_SCALE] = {"G", "D", "A", "E", "B", "F#", "C#"};
 string flats[NUM_NOTES_PER_SCALE] = { "F", "Bb", "Eb", "Ab", "Db", "Gb", "Cb" };
@@ -36,20 +19,50 @@ string flats[NUM_NOTES_PER_SCALE] = { "F", "Bb", "Eb", "Ab", "Db", "Gb", "Cb" };
 int AskNthOfMajorScale()
 {
 	int noteChoice = rand() % (NUM_NOTES_PER_SCALE-1);
-	int scaleChoice = rand() % NUM_SCALES;
+	int scaleChoice = rand() % NUM_MAJOR_SCALES;
 
 	string input;
-	cout << "What is the: " << numbers[noteChoice] << " of " << scales[scaleChoice][0] << " major?  ";// << endl;
+
+	string scaleName = majorScales[scaleChoice].NameToString();
+
+	cout << "What is the: " << numbers[noteChoice] << " of " << scaleName << "?  ";
+
 	cin >> input;
 
-	if (input == scales[scaleChoice][noteChoice + 1])
+	string noteStr = majorScales[scaleChoice].GetNote(noteChoice + 2).ToString();
+	if (input == noteStr)//[noteChoice + 1])
 	{
 		cout << "Correct!" << endl;
 		return 1;
 	}
 	else
 	{
-		cout << "Wrong. The " << numbers[noteChoice] << " of " << scales[scaleChoice][0] << " major is " << scales[scaleChoice][noteChoice+1] << endl;
+		cout << "Wrong. The " << numbers[noteChoice] << " of " << scaleName << " is " << noteStr << endl;
+		return 0;
+	}
+}
+
+int AskBackwardsNthOfMajorScale()
+{
+	int noteChoice = rand() % (NUM_NOTES_PER_SCALE - 1);
+	int scaleChoice = rand() % NUM_MAJOR_SCALES;
+
+	Note n = majorScales[scaleChoice].GetNote(noteChoice + 2);
+
+	string scaleName = majorScales[scaleChoice].GetNote(1).ToString();
+
+	string input;
+	cout << n.ToString() << " is the " << numbers[noteChoice] << " of which major scale?  ";
+	cin >> input;
+
+	if (input == scaleName)//[noteChoice + 1])
+	{
+		cout << "Correct!" << endl;
+		return 1;
+	}
+	else
+	{
+		cout << "Wrong. " << n.ToString() << " is the " << numbers[noteChoice] << " of " << scaleName << endl;
 		return 0;
 	}
 }
@@ -110,205 +123,83 @@ int AskNumberOfAccidentals()
 	}
 }
 
-const static int TOTAL_HALF_STEPS = 12;
-
-enum Letter
+void FillMajorScales()
 {
-	LETTER_C,
-	LETTER_D,
-	LETTER_E,
-	LETTER_F,
-	LETTER_G,
-	LETTER_A,
-	LETTER_B,
-	LETTERS_Count
-};
-
-string letterStr[] = { "C", "D", "E", "F", "G", "A", "B" };
-
-enum ScaleType
-{
-	SCALE_MAJOR,
-	SCALE_MINOR,
-};
-
-enum Accidental
-{
-	ACC_NEUTRAL,
-	ACC_SHARP,
-	ACC_FLAT,
-	ACC_DOUBLESHARP,
-	ACC_DOUBLEFLAT,
-};
-
-int scaleIntervals[][7]
-{
-	{ 0, 2, 4, 5, 7, 9, 11 },
-	{ 0, 2, 3, 5, 7, 8, 10 }
-};
-
-
-int defaultLetterOffsets[] = { 0, 2, 4, 5, 7, 9, 11 };
-
-struct Note
-{
-	Note()
-	{
-		letter = LETTER_C;
-		accidental = ACC_NEUTRAL;
-	}
-
-	int letter;
-	int accidental;
-	string ToString()
-	{
-		return letterStr[letter] + GetAccidentalString();
-	}
-
-	string GetAccidentalString()
-	{
-		switch (accidental)
-		{
-		case ACC_NEUTRAL:
-			return "";
-		case ACC_SHARP:
-			return "#";
-		case ACC_FLAT:
-			return "b";
-		case ACC_DOUBLESHARP:
-			return "##";
-		case ACC_DOUBLEFLAT:
-			return "bb";
-		default:
-			return "_error";
-		}
-	}
-};
-
-
-//noteIndex starts at 1
-Note GetNote(int scaleType, int startLetter, int accidental, int noteIndex)
-{
-	Note note;
-
-	note.letter = (startLetter + (noteIndex-1)) % LETTERS_Count;
-
-	int accidentalOffset = 0;
-	if (accidental == ACC_SHARP)
-	{
-		accidentalOffset = 1;
-	}
-	else if (accidental == ACC_FLAT)
-	{
-		accidentalOffset = -1;
-	}
-
-	int currOffset = defaultLetterOffsets[startLetter] + accidentalOffset;
-	if (noteIndex > 1)
-	{
-		currOffset += scaleIntervals[scaleType][noteIndex - 1];
-	}
-
-	while (currOffset < 0)
-	{
-		currOffset += TOTAL_HALF_STEPS;
-	}
-
-	currOffset = currOffset % TOTAL_HALF_STEPS;
-
-	int currDefaultLetterOffset = defaultLetterOffsets[note.letter];
-
-	int oneLessOffset = currDefaultLetterOffset - 1;
-	if (oneLessOffset < 0 )
-	{
-		oneLessOffset += TOTAL_HALF_STEPS;
-	}
-
-	int twoLessOffset = currDefaultLetterOffset - 2;
-	if (twoLessOffset < 0)
-	{
-		twoLessOffset += TOTAL_HALF_STEPS;
-	}
-
-	if (currOffset == (currDefaultLetterOffset + 1) % TOTAL_HALF_STEPS )
-	{
-		note.accidental = ACC_SHARP;
-	}
-	else if (currOffset == (currDefaultLetterOffset + 2) % TOTAL_HALF_STEPS)
-	{
-		note.accidental = ACC_DOUBLESHARP;
-	}
-	else if (currOffset == oneLessOffset)
-	{
-		note.accidental = ACC_FLAT;
-	}
-	else if (currOffset == twoLessOffset)
-	{
-		note.accidental = ACC_DOUBLEFLAT;
-	}
-	else if (currOffset == currDefaultLetterOffset)
-	{
-		note.accidental = ACC_NEUTRAL;
-	}
-	else
-	{
-		assert(0);
-		note.accidental = ACC_NEUTRAL;
-	}
-
-	return note;
-}
-
-void PrintScale(int scaleType, int startLetter, int accidental)
-{
-	for (int i = 1; i < 8; ++i)
-	{
-		cout << GetNote(scaleType, startLetter, accidental, i).ToString() << " ";
-	}
-	cout << endl;
+	/*{
+		{ "C", "D", "E", "F", "G", "A", "B" },
+		{ "D", "E", "F#", "G", "A", "B", "C#" },
+		{ "E", "F#", "G#", "A", "B", "C#", "D#" },
+		{ "F#", "G#", "A#", "B", "C#", "D#", "E#" },
+		{ "Ab", "Bb", "C", "Db", "Eb", "F", "G" },
+		{ "Bb", "C", "D", "Eb", "F", "G", "A" },
+		{ "G", "A", "B", "C", "D", "E", "F#" },
+		{ "A", "B", "C#", "D", "E", "F#", "G#" },
+		{ "B", "C#", "D#", "E", "F#", "G#", "A#" },
+		{ "Db", "Eb", "F", "Gb", "Ab", "Bb", "C" },
+		{ "Eb", "F", "G", "Ab", "Bb", "C", "D" },
+		{ "F", "G", "A", "Bb", "C", "D", "E" },
+	};*/
+	majorScales[0] = Scale(SCALE_MAJOR, LETTER_C, ACC_NEUTRAL);
+	majorScales[1] = Scale(SCALE_MAJOR, LETTER_D, ACC_NEUTRAL);
+	majorScales[2] = Scale(SCALE_MAJOR, LETTER_E, ACC_NEUTRAL);
+	majorScales[3] = Scale(SCALE_MAJOR, LETTER_F, ACC_SHARP);
+	majorScales[4] = Scale(SCALE_MAJOR, LETTER_A, ACC_FLAT);
+	majorScales[5] = Scale(SCALE_MAJOR, LETTER_B, ACC_FLAT);
+	majorScales[6] = Scale(SCALE_MAJOR, LETTER_G, ACC_NEUTRAL);
+	majorScales[7] = Scale(SCALE_MAJOR, LETTER_A, ACC_NEUTRAL);
+	majorScales[8] = Scale(SCALE_MAJOR, LETTER_B, ACC_NEUTRAL);
+	majorScales[9] = Scale(SCALE_MAJOR, LETTER_D, ACC_FLAT);
+	majorScales[10] = Scale(SCALE_MAJOR, LETTER_E, ACC_FLAT);
+	majorScales[11] = Scale(SCALE_MAJOR, LETTER_F, ACC_NEUTRAL);
 }
 
 int main()
 {
+	FillMajorScales();
+
 	while (true)
 	{
-		int scaleType = SCALE_MAJOR;
+		/*int scaleType = SCALE_MAJOR;
 		int letter = LETTER_B;
 		int acc = ACC_NEUTRAL;
 
-		for (int li = 0; li < LETTERS_Count; ++li)
-		{
-			PrintScale(scaleType, li, acc);
-		}
-		
+		Note n(LETTER_F, ACC_NEUTRAL);
+		Scale testScale = Scale::GetScaleThatNoteIsXthOf(SCALE_MAJOR, 6, n);
+		cout << "test: ";
+		testScale.PrintName();
+		cout << endl;
+
+		Scale s(scaleType, letter, acc);
+		s.PrintName();
+		cout << ": ";
+		s.PrintNotes();
+		cout << endl;
 
 		int x;
-		cin >> x;
+		cin >> x;*/
+
+		cout << "-----------ROUND START-----------" << endl;
+		srand(time(0));
+
+		auto startTime = chrono::high_resolution_clock::now();
+
+		int numQuestions = 10;
+		int totalScore = 0;
+		for (int i = 0; i < numQuestions; ++i)
+		{
+			totalScore += AskBackwardsNthOfMajorScale();
+			//totalScore += AskNthOfMajorScale();
+			//totalScore += AskNumberOfAccidentals();
+		}
 
 
+		auto finishTime = chrono::high_resolution_clock::now();
 
+		chrono::duration<double> totalTime = finishTime - startTime;
 
-		//cout << "-----------ROUND START-----------" << endl;
-		//srand(time(0));
-
-		//auto startTime = chrono::high_resolution_clock::now();
-
-		//int numQuestions = 10;
-		//int totalScore = 0;
-		//for (int i = 0; i < numQuestions; ++i)
-		//{
-		//	totalScore += AskNthOfMajorScale();
-		//	//totalScore += AskNumberOfAccidentals();
-		//}
-
-
-		//auto finishTime = chrono::high_resolution_clock::now();
-
-		//chrono::duration<double> totalTime = finishTime - startTime;
-
-		//cout << "---------------------------------" << endl;
-		//cout << "You scored: " << totalScore << "/" << numQuestions << endl;
-		//cout << "You took " << totalTime.count() << " seconds." << endl;
-		//cout << "\n\n\n\n" << endl;
+		cout << "---------------------------------" << endl;
+		cout << "You scored: " << totalScore << "/" << numQuestions << endl;
+		cout << "You took " << totalTime.count() << " seconds." << endl;
+		cout << "\n\n\n\n" << endl;
 	}
 }
