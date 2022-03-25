@@ -1,6 +1,4 @@
 ﻿  main.cpp
-c:\users\ficti\documents\visual studio 2015\projects\scales\scales\main.cpp(182): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
-  Note.cpp
-  Generating Code...
+c:\users\ficti\documents\visual studio 2015\projects\scales\scales\main.cpp(281): warning C4244: 'argument': conversion from 'time_t' to 'unsigned int', possible loss of data
   Scales.vcxproj -> C:\Users\ficti\Documents\Visual Studio 2015\Projects\Scales\Debug\Scales.exe
   Scales.vcxproj -> C:\Users\ficti\Documents\Visual Studio 2015\Projects\Scales\Debug\Scales.pdb (Partial PDB)

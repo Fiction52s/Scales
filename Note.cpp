@@ -179,9 +179,13 @@ string Scale::NotesToString()
 string Scale::NameToString()
 {
 	string str = letterStr[letter] + Note::GetAccidentalString(accidental);
-	if (scaleType == SCALE_MINOR)
+	if (scaleType == SCALE_MAJOR)
 	{
-		str += "minor";
+		str += " Major";
+	}
+	else if (scaleType == SCALE_MINOR)
+	{
+		str += " minor";
 	}
 
 	return str;

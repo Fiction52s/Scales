@@ -2,13 +2,30 @@
 #define __NOTE_H__
 
 #include <string>
+#include <map>
 
 const static int NUM_MAJOR_SCALES = 12;
 const static int NUM_NOTES_PER_SCALE = 7;
 const static int TOTAL_HALF_STEPS = 12;
 
-static std::string numbers[] = { "2nd", "3rd", "4th", "5th", "6th", "7th" };
+enum ScaleType
+{
+	SCALE_MAJOR,
+	SCALE_MINOR,
+	SCALE_Count
+};
+
+static std::string scaleTypeNames[SCALE_Count] = { "Major", "minor" };
+static std::string chordQualities[SCALE_Count][NUM_NOTES_PER_SCALE] = 
+{ 
+	{ "M", "m", "m", "M", "M", "m", "d" },
+	{ "m", "d", "M", "m", "m", "M", "M" }
+};
+
+static std::string numbers[] = { "1st", "2nd", "3rd", "4th", "5th", "6th", "7th" };
 static std::string letterStr[] = { "C", "D", "E", "F", "G", "A", "B" };
+
+static std::map<std::string, std::string> chordQualityNames;
 
 enum Letter
 {
@@ -20,12 +37,6 @@ enum Letter
 	LETTER_A,
 	LETTER_B,
 	LETTERS_Count
-};
-
-enum ScaleType
-{
-	SCALE_MAJOR,
-	SCALE_MINOR,
 };
 
 enum Accidental
@@ -42,7 +53,6 @@ static int scaleIntervals[][7]
 	{ 0, 2, 4, 5, 7, 9, 11 },
 	{ 0, 2, 3, 5, 7, 8, 10 }
 };
-
 
 static int defaultLetterOffsets[] = { 0, 2, 4, 5, 7, 9, 11 };
 
